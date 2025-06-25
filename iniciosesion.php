@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 } else {
     // Acceso directo al script sin enviar formulario
-    header("Location: menu.html");
+    header("Location: login.html");
     exit();
 }
 ?>
