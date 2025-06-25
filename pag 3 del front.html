@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Larrain - Carrito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        
+        .cart-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .cart-items th, .cart-items td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .cart-items th {
+            background-color: #f2f2f2;
+        }
+        
+        .cart-total {
+            text-align: right;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .checkout-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            float: right;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .continue-shopping {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .continue-shopping:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            clear: both;
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tienda Larrain</h1>
+    <a href="pag 2 del front.html" class="continue-shopping">← Continuar comprando</a>
+    
+    <h2>Tu Carrito de Compras</h2>
+    
+    <div id="cart-container">
+        <div class="empty-cart">Cargando tu carrito...</div>
+    </div>
+    
+    <footer>
+        © <span id="current-year"></span> Tienda Larrain. Todos los derechos reservados.
+    </footer>
+
+    <div class="notification" id="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Mostrar año actual
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Función para formatear precio
+        function formatPrice(price) {
+            return '€ ' + parseFloat(price).toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Cargar carrito desde el servidor
+        async function loadCart() {
+            try {
+                const response = await fetch('obtenercarrito.php');
+                const data = await response.json();
+                
+                const container = document.getElementById('cart-container');
+                
+                if (!data.success || !data.carrito || data.carrito.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-cart">
+                            Tu carrito está vacío<br>
+                            <a href="pag2_del_front.html" class="continue-shopping">Ver productos</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Calcular total
+                let total = 0;
+                data.carrito.forEach(item => {
+                    total += item.precio * item.cantidadproducto;
+                });
+                
+                // Generar tabla de productos
+                let html = `
+                    <table class="cart-items">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio unitario</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.carrito.forEach(item => {
+                    const subtotal = item.precio * item.cantidadproducto;
+                    html += `
+                        <tr>
+                            <td>${item.nombreproducto}</td>
+                            <td>${formatPrice(item.precio)}</td>
+                            <td>${item.cantidadproducto}</td>
+                            <td>${formatPrice(subtotal)}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    <div class="cart-total">
+                        Total: ${formatPrice(total)}
+                    </div>
+                    <button class="checkout-btn" onclick="checkout()">Finalizar Compra</button>
+                `;
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('cart-container').innerHTML = `
+                    <div class="empty-cart">
+                        Error al cargar el carrito. Por favor intenta nuevamente.
+                    </div>
+                `;
+            }
+        }
+
+        // Finalizar compra
+        async function checkout() {
+            const btn = document.querySelector('.checkout-btn');
+            const notification = document.getElementById('notification');
+            const notificationMsg = document.getElementById('notification-message');
+            
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+            
+            try {
+                const response = await fetch('finalizarcompra.php', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    notificationMsg.textContent = '¡Compra finalizada con éxito!';
+                    notification.style.display = 'block';
+                    notification.style.backgroundColor = '#2ecc71';
+                    
+                    // Recargar carrito vacío
+                    setTimeout(() => {
+                        loadCart();
+                        notification.style.display = 'none';
+                    }, 3000);
+                } else {
+                    notificationMsg.textContent = data.error || 'Error al finalizar la compra';
+                    notification.style.display = 'block';
+                    notification.style.backgroundColor = '#e74c3c';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                notificationMsg.textContent = 'Error de conexión';
+                notification.style.display = 'block';
+                notification.style.backgroundColor = '#e74c3c';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Finalizar Compra';
+            }
+        }
+
+        // Cargar carrito al iniciar la página
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+</html>
