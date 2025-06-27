@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <!-- Configuración básica de caracteres y responsive design -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Aqua Benavides</title>
+  <!-- Estilos CSS embebidos -->
+  <style>
+    /* Estilo para todo el cuerpo del documento */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif; /* Fuente del texto */
+      background: url('fondo-aqua.png') repeat; /* Fondo con imagen repetida (reemplaza 'fondo.jpg' por tu imagen) */
+      display: flex; /* Flexbox para centrar */
+      justify-content: center; /* Centrado horizontal */
+      align-items: center; /* Centrado vertical */
+      height: 100vh; /* Altura de toda la ventana */
+    }
+
+    /* Contenedor del formulario */
+    .login-container {
+      background-color: white; /* Fondo blanco */
+      padding: 140px; /* Espaciado interno */
+      box-shadow: 0 1px 20px rgb(103, 103, 103); /* Sombra suave */
+      width: 340px; /* Ancho fijo */
+      border-radius: 0px; /* Bordes redondeados */
+    }
+
+    /* Título del formulario (si agregas uno) */
+    .login-container h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Grupo de cada input (nombre, email, etc.) */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    /* Etiqueta de cada campo (por ejemplo, "FIRST NAME") */
+    .form-group label {
+      display: block;
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    /* Estilos para inputs de texto, email y contraseña */
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+      width: 100%; /* Que ocupe todo el ancho */
+      padding: 15px; /* Espaciado interno */
+      border: 1px solid #ccc; /* Borde gris claro */
+      outline: none;
+      border-radius: 0px; /* Bordes redondeados */
+    }
+
+    /* Estilo especial para contraseñas (espaciado entre asteriscos) */
+    .form-group input[type="password"] {
+      font-family: sans-serif;
+      letter-spacing: 2px;
+    }
+
+    /* Contenedor del checkbox de términos */
+    .checkbox-group {
+      display: flex; /* Flexbox para alinear checkbox y texto */
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Checkbox alineado a la izquierda */
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+    }
+
+    /* Texto del checkbox */
+    .checkbox-group label {
+      font-size: 12px;
+    }
+
+    /* Enlaces dentro del texto de términos */
+    .checkbox-group a {
+      color: #555;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    /* Botón de login */
+    .login-btn {
+      width: 110%; /* Ocupa todo el ancho */
+      padding: 20px; /* Espaciado */
+      background-color: #2e3d59; /* Color azul oscuro */
+      color: white; /* Texto blanco */
+      border: none; /* Sin borde */
+      border-radius: 0px; /* Bordes redondeados */
+      cursor: pointer; /* Cursor tipo botón */
+      font-size: 17px; /* Tamaño del texto */
+    }
+
+    /* Efecto hover al pasar el mouse sobre el botón */
+    .login-btn:hover {
+      background-color: #1d2b45;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Contenedor principal del formulario -->
+  <div class="login-container">
+    <!-- Inicio del formulario -->
+    <form action="iniciosesion.php" method="POST">
+
+      <!-- Campo: Correo electrónico -->
+      <div class="form-group">
+        <label for="email">CORREO ELECTRÓNICO</label>
+        <input type="text" id="email" placeholder="Eje: Correo@gmail.com" name="email" required />
+      </div>
+
+      <!-- Campo: Contraseña -->
+      <div class="form-group">
+        <label for="password">CONTRASEÑA</label>
+        <input type="password" id="password" placeholder="********" name="password" required />
+      </div>
+
+      <!-- Checkbox: Aceptación de términos -->
+      <div class="checkbox-group">
+        <input type="checkbox" id="terms" checked />
+        <label for="terms">
+          I agree to the <a href="https:Aqua.cl//terminos">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <!-- Botón para enviar el formulario -->
+      <input type="submit" value="Iniciar Sesion" name="usuario">
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Larrain</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .divider {
+            border: 0;
+            height: 1px;
+            background: #3498db;
+            margin: 30px 0;
+        }
+        
+        .product-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .product-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            position: relative;
+        }
+        
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .product-specs {
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .product-price {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .product-stock {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        
+        .add-to-cart {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .add-to-cart:hover {
+            background-color: #2980b9;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .cart-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .cart-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .cart-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 15px;
+            background-color: #fdecea;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="login.html" class="cerrar-brn">← Cerrar Sesion</a>
+    <h1>Tienda Larrain</h1>
+    <a href="pag 3 del front.html" class="cart-btn" id="cartButton">🛒 Carrito</a>
+    
+    <h2>Bienvenido a Tienda Larrain</h2>
+    <p class="welcome-text">
+        Explore nuestra selección de PCs para gaming, oficina y diseño profesional.<br>
+        Calidad y rendimiento al mejor precio.
+    </p>
+    
+    <hr class="divider">
+    
+    <h2>PCs Disponibles</h2>
+    <ul class="product-list" id="productos-container">
+        <li class="loading">Cargando productos...</li>
+    </ul>
+    
+    <footer>
+        © <span id="current-year"></span> Tienda Larrain. Todos los derechos reservados.
+    </footer>
+
+    <div class="cart-notification" id="cartNotification">
+        <span>✓ Producto agregado al carrito</span>
+    </div>
+
+    <script>
+        // Mostrar año actual
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Función para escapar HTML (seguridad)
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Función para formatear precio
+        function formatPrice(price) {
+            return '€ ' + parseFloat(price).toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Cargar productos desde PHP
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('mostrarproducto.php')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los productos');
+                    }
+                    return response.json();
+                })
+                .then(productos => {
+                    const container = document.getElementById('productos-container');
+                    container.innerHTML = ''; // Limpiar mensaje de carga
+
+                    if (productos.length === 0) {
+                        container.innerHTML = '<li class="error-message">No hay productos disponibles actualmente</li>';
+                        return;
+                    }
+
+                    productos.forEach(producto => {
+                        const li = document.createElement('li');
+                        li.className = 'product-item';
+                        li.innerHTML = `
+                            <div class="product-name">${escapeHtml(producto.nombreproducto)}</div>
+                            <div class="product-specs">${escapeHtml(producto.descripcion || producto.nombreproducto)}</div>
+                            <div class="product-price">${formatPrice(producto.precio)}</div>
+                            <div class="product-stock">Stock: ${producto.stock} unidades</div>
+                            <button type="button" class="add-to-cart" 
+                                onclick="addToCart(${producto.idproducto}, ${producto.precio})"
+                                ${producto.stock <= 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
+                                ${producto.stock <= 0 ? 'Sin stock' : 'Agregar al Carrito'}
+                            </button>
+                        `;
+                        container.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('productos-container').innerHTML = 
+                        '<li class="error-message">Error al cargar los productos. Por favor intente más tarde.</li>';
+                });
+                
+            // Actualizar contador del carrito al cargar la página
+            updateCartCounter();
+        });
+
+        // Función para agregar al carrito
+        async function addToCart(idproducto, precio) {
+            const notification = document.getElementById('cartNotification');
+            const button = event.target;
+            
+            // Deshabilitar botón temporalmente para evitar múltiples clicks
+            button.disabled = true;
+            button.textContent = 'Agregando...';
+            
+            try {
+                const response = await fetch('agregarcarrito.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idproducto: idproducto,
+                        precio: precio
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mostrar notificación
+                    notification.style.display = 'block';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 3000);
+                    
+                    // Actualizar contador del carrito
+                    await updateCartCounter();
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo agregar al carrito'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión con el servidor');
+            } finally {
+                // Restaurar botón
+                button.disabled = false;
+                button.textContent = 'Agregar al Carrito';
+            }
+        }
+
+        // Función para actualizar contador del carrito
+        async function updateCartCounter() {
+            try {
+                const response = await fetch('obtenercarrito.php');
+                const data = await response.json();
+                const cartButton = document.getElementById('cartButton');
+                
+                if (data.success && data.carrito) {
+                    const totalItems = data.carrito.reduce((sum, item) => sum + item.cantidadproducto, 0);
+                    if (cartButton) {
+                        cartButton.innerHTML = totalItems > 0 
+                            ? `🛒 Carrito (${totalItems})` 
+                            : '🛒 Carrito';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al actualizar contador:', error);
+            }
+        }
+    </script>
+</body>
+</html>
